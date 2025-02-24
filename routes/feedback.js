@@ -3,11 +3,11 @@ const router = express.Router();
 const Feedback = require('../models/feedback_schema');
 
 router.post('/upload', async (req, res) => {
-    const { username, feedback } = req.body;
-  if (!username || !feedback) {
-    return res.status(400).json({ message: "Username and feedback are required!" });
+    const { userId, feedback } = req.body;
+  if (!userId || !feedback) {
+    return res.status(400).json({ message: "User ID and feedback are required!" });
   }
-  const newFeedback = new Feedback({ username, feedback });
+  const newFeedback = new Feedback({ userId, feedback });
   try {
     await newFeedback.save();
     res.status(201).json(newFeedback);
