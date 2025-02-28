@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
-
-const reviewSchema = new mongoose.Schema({
-    username: { type: String, required: true },
-    review: { type: String, required: true },
-    date: { type: String, required: true },
-    image: { type: String } 
+const mongoose = require('mongoose');
+const ReviewSchema = new mongoose.Schema({
+    userId: String,
+    feedback: String,
+    date: Date,
+    image: String ,
+    imageName :String
 });
 
-module.exports = mongoose.model("Review", reviewSchema);
+module.exports = mongoose.model('Review', ReviewSchema);
