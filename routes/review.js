@@ -1,77 +1,74 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Review = require("../models/reviewSchema");
-const upload = require("../middleware/multer");
+const Review = require('../models/reviewSchema');
 
-// Create a Review
-router.post("/upload", upload.single("image"), async (req, res) => {
+// Upload route
+router.post('/upload', async (req, res) => {
     try {
-      console.log("Received form data:", req.body);
-      console.log("Uploaded file data:", req.file);
+        const { userId, feedback, date, image, imageName } = req.body; 
 
-      if (!req.body.username || !req.body.review || !req.body.date) {
-        return res.status(400).json({ error: "Missing required fields" });
-      }
-
-      let imageBase64 = null;
-      if (req.file) {
-          imageBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
-      }
-
-      const newReview = new Review({
-          userId: req.body.username,
-          review: req.body.review,
-          date: req.body.date,
-          image: imageBase64
-      });
-
-      await newReview.save();
-      res.status(201).json({ message: "Review submitted successfully!" });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to submit review", details: error.message });
-    }
-});
-
-// Read All Reviews
-router.get("/", async (req, res) => {
-    try {
-        const reviews = await Review.find();
-        res.json(reviews);
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch reviews", details: error.message });
-    }
-});
-
-// Update a Review
-router.put("/update/:id", upload.single("image"), async (req, res) => {
-    try {
-        const { username, review, date } = req.body;
-        let imageBase64 = null;
-
-        if (req.file) {
-            imageBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+        if (!userId || !feedback) {
+            return res.status(400).json({ error: 'userId and Review are required' });
         }
 
-        const updatedReview = await Review.findByIdAndUpdate(req.params.id, {
+        const newReview = new Review({
             userId,
-            review,
+            feedback,
             date,
-            image: imageBase64
-        }, { new: true });
+            image,
+            imageName 
+        });
 
-        res.json(updatedReview);
+        await newReview.save();
+        res.status(201).json({ message: 'Review created successfully', data: newReview });
+
     } catch (error) {
-        res.status(500).json({ error: "Failed to update review", details: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Delete a Review
-router.delete("/delete/:id", async (req, res) => {
+
+// Read Feedback
+router.get('/', async (req, res) => {
+    try {
+        const Reviews = await Review.find();
+        res.json(Reviews);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Read Feedback by userId
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const Reviews = await Review.find({ userId });
+        res.json(Reviews);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update Feedback
+router.put('/update/:id', async (req, res) => {
+    try {
+        const { userId, feedback, date, image, imageName } = req.body;
+        const updateData = { userId, feedback, date, image, imageName };
+
+        const updatedReview = await Review.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.json({ message: 'Review updated successfully', data: updatedReview });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete Feedback
+router.delete('/delete/:id', async (req, res) => {
     try {
         await Review.findByIdAndDelete(req.params.id);
-        res.json({ message: "Review deleted successfully!" });
+        res.json({ message: 'Review deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: "Failed to delete review", details: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
